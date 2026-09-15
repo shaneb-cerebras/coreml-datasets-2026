@@ -72,9 +72,7 @@ The incremental data is not uniformly valuable. There is a large amount of histo
 
 Common Corpus includes public-domain material plus "free/open" licenses that permit use for any purpose, including commercial use. In practice this includes broadly the same classes of licenses accepted by Common Pile.
 
-A particularly conservative option would be to restrict Common Corpus to the same license classes already accepted by legal for Common Pile.
-
-**Proposed legal ask:** approve Common Corpus, potentially restricted to the license classes already approved for Common Pile.
+**Proposed legal ask:** approve Common Corpus.
 
 ## Code and Stack v3
 
