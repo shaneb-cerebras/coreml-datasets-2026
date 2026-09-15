@@ -10,9 +10,7 @@ Prior work:
 
 ## On Common Pile "approval"
 
-Matt Hulse did approve the "Don't Drop Dropout" paper when it retrained its data using CommonPile:
-
-<img width="1272" height="463" alt="image" src="https://github.com/user-attachments/assets/81478c54-ae98-4594-9f14-5c1ea8d1d016" />
+Matt Hulse did approve the "Don't Drop Dropout" paper when it retrained its data using CommonPile (with Mostafa's notes about removing "new-filtered", "youtube_filtered", "stackexchange_filtered", etc., removed)
 
 Joel's notes on the approval process:
 > - RE: CommonPile: As far as I’m aware, we don’t have a blanket, general approval for CommonPile (or any datasets, yet?). I’m not sure if legal would ever give written general approval of any dataset; Essentially everything has copyrights by default, so unlikely they’d ever commit to a dataset as completely “approved”. There’s always risk using data not created or synthesized by Cerebras using purely Cerebras resources. We need to review each use and check with legal on riskier things.
