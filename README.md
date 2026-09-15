@@ -10,12 +10,16 @@ Prior work:
 
 ## On Common Pile "approval"
 
-Matt Hulse did approve the "Don't Drop Dropout" paper when it retrained its data using CommonPile (with Mostafa's notes about removing "new-filtered", "youtube_filtered", "stackexchange_filtered", etc., removed)
+Mostafa says: don't use those subsets of CommonPile
+- news_filtered : we ran a script and found that includes materials from websites that are not copyright-free (e.g., nytimes.com)
+- youtube_filtered: to be on the safe side, we are avoiding it because not all YouTube video owners give permission to use their subtitles as data
+- stackexchange_filtered: also to be on the safe side we are avoiding it because there are news articles here and there about Stack Exchange  restricting the user of their data to train LLMs
+
+Matt Hulse did approve the "Don't Drop Dropout" paper when we retrained with data coming from CommonPile (with Mostafa's notes about removing "new-filtered", "youtube_filtered", "stackexchange_filtered", etc., removed)
 
 Joel's notes on the approval process:
 > - RE: CommonPile: As far as I’m aware, we don’t have a blanket, general approval for CommonPile (or any datasets, yet?). I’m not sure if legal would ever give written general approval of any dataset; Essentially everything has copyrights by default, so unlikely they’d ever commit to a dataset as completely “approved”. There’s always risk using data not created or synthesized by Cerebras using purely Cerebras resources. We need to review each use and check with legal on riskier things.
-
-However, as Mostafa notes, the Don’t Drop Dropout paper was approved using CommonPile. We also have tacit acknowledgement that CommonPile does not violate any of the restrictions that legal has specified. It is likely one of the safest datasets we could use currently (maybe just for pretraining, fine-tuning?).
+> However, as Mostafa notes, the Don’t Drop Dropout paper was approved using CommonPile. We also have tacit acknowledgement that CommonPile does not violate any of the restrictions that legal has specified. It is likely one of the safest datasets we could use currently (maybe just for pretraining, fine-tuning?).
 
 ## On the general process
 
