@@ -29,6 +29,13 @@ Our filtered+shuffled training copy **measures ~402.8B tokens** (counted directl
 the ~400B "filtered" figure. It already **excludes** StackExchange, CC YouTube, and 6 tiny sources
 (see [Excluded sources](#excluded-sources-vs-paper-table-7)).
 
+> **"Raw" vs what we have — avoid confusion.** Everything on `mb306` under `common_pile/` is the
+> **Filtered** variant, and already **tokenized** (Llama-3, vocab 128256). Specifically,
+> `/cb/home/gaviag/datasets/common_pile/data/` is the **tokenized filtered `.bin` source**
+> (not raw text, and not the unfiltered ~8 TB "Raw" Common Pile). It's only "raw" in the sense of
+> *pre-HDF5-packing*. The unfiltered **Raw** Common Pile (~8 TB / ~1.6T tokens) is **not present here** —
+> it would have to be sourced/tokenized separately if needed.
+
 **Filtering applied to produce the Filtered set** (paper Table 6):
 - **Language:** English only (FastText language classifier; other languages removed).
 - **Web-text quality:** low-threshold DataComp-LM–style quality classifier on Creative-Commons Common Crawl.
@@ -41,7 +48,8 @@ the ~400B "filtered" figure. It already **excludes** StackExchange, CC YouTube, 
 
 | What | Path |
 |---|---|
-| Original tokenized `.bin` + build scripts | `/cb/home/gaviag/datasets/common_pile/` (`data/`, `bin_to_hdf5.py`, `compute_weights.py`, `common_pile.py`) |
+| **Filtered tokenized `.bin` source** (input to our HDF5) — 31 `*_filtered` source dirs, ~797 GB | `/cb/home/gaviag/datasets/common_pile/data/` (holds `common_pile_train_*.bin`; incl. stackexchange/youtube/news, which we exclude from training) |
+| Build scripts | `/cb/home/gaviag/datasets/common_pile/` (`bin_to_hdf5.py`, `compute_weights.py`, `common_pile.py`) |
 | Tokenizer (vocab 128256) | `/cb/home/gaviag/datasets/common_pile/tokenizer/` |
 | **HDF5 shuffled (RECOMMENDED)** — 2026-09-08 reprocess, ~403B tok | `/cb/home/mostafae/research/outdirs/datasets/experiments/20260908_commonpilev0.1_filtered_reprocess/dataset_shuffled/{train,val}/` |
 | HDF5 raw (unshuffled) — same reprocess | `.../20260908_commonpilev0.1_filtered_reprocess/dataset/{train,val}/` |
@@ -75,6 +83,40 @@ python /cb/home/mostafae/research/monolith_config_gen/mostafae/utils/shuffle_h5_
 
 Train and val are **separate directory splits made before shuffling** → they contain **different
 documents** (expected holdout; see caveats).
+
+## Getting a different tokenization (or the unfiltered Raw)
+
+The `.bin`/HDF5 on mb306 are **Llama-3 tokenized** (vocab 128256) and **cannot be reused for a different
+tokenizer** — you re-run Gavia's pipeline, which pulls the **text from HuggingFace** and tokenizes on the
+fly. There is **no local text copy**: `common_pile.py` streams each subset via
+`load_dataset("common-pile/<subset>", split="train")` (cached under `HF_HOME`) and tokenizes with
+`AutoTokenizer.from_pretrained(--tokenizer)` (BOS prepended per document; int32 `.bin` shards).
+
+Recipe (scripts in `/cb/home/gaviag/datasets/common_pile/`; see its `Makefile` for exact targets — the
+heavy run was done on a scratch node `jnodea2`, then rsync'd to mb306):
+
+```bash
+# 1) download text from HF + tokenize with a DIFFERENT tokenizer -> .bin (int32 tokens, BOS/doc)
+python common_pile.py \
+    --tokenizer /path/to/OTHER_tokenizer \
+    --output_dir /path/to/new_bins
+    # optional: --datasets peS2o_filtered github_archive_filtered ...   # subset
+    #           --shard_size 100000000  --nprocs N ;  set HF_HOME for the download cache
+
+# 2) pack to HDF5 (choose seq_len)
+python bin_to_hdf5.py --input_dir /path/to/new_bins --output_dir /path/to/new_hdf5 --seq_len 8192
+
+# 3) global shuffle (recommended for shuffle:false training)
+python /cb/home/mostafae/research/monolith_config_gen/mostafae/utils/shuffle_h5_data.py \
+    --input_dir /path/to/new_hdf5 --output_dir /path/to/new_hdf5_shuffled
+```
+
+Notes:
+- **Unfiltered Raw variant:** point `common_pile.py` at the raw HF datasets instead of the `*_filtered`
+  ones (edit its `DATASETS` list / the `common-pile/<name>` id), then steps 2–3 as above (~8 TB / ~1.6T tokens).
+- `.bin` stores **int32** tokens (fine for any vocab) with a **BOS prepended per document**.
+- Set the training YAML `vocab_size` to the new tokenizer's vocab size.
+- Run on a node with HF access + scratch space; it re-downloads ~all of Common Pile and re-tokenizes (compute + bandwidth heavy).
 
 ## HDF5 format
 
